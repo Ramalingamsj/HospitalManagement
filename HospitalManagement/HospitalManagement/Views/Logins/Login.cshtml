@@ -1,0 +1,116 @@
+﻿@model LoginModel
+@{
+    Layout = null;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<style>
+    body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    .login-card {
+        width: 360px;
+        padding: 40px 35px;
+        border-radius: 14px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .logo {
+        font-size: 28px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 8px;
+        color: #111827;
+    }
+
+    .subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 28px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 15px;
+    }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+        }
+
+    .btn-login {
+        border-radius: 8px;
+        padding: 10px;
+        font-weight: 600;
+        background: #2563eb;
+        border: none;
+    }
+
+        .btn-login:hover {
+            background: #1e40af;
+        }
+
+    .error-msg {
+        font-size: 14px;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .footer-text {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 13px;
+        color: #9ca3af;
+    }
+</style>
+
+<div class="login-card">
+
+    <div class="logo">Hospital</div>
+    <div class="subtitle">Sign in to your account</div>
+
+    <form method="post">
+
+        <div class="mb-3">
+            <input asp-for="Username" class="form-control" placeholder="Username" />
+            <span asp-validation-for="Username" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <input asp-for="Password" type="password" class="form-control" placeholder="Password" />
+            <span asp-validation-for="Password" class="text-danger small"></span>
+        </div>
+
+        <button class="btn btn-primary w-100 btn-login">Login</button>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="text-danger error-msg">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+    </form>
+
+    <div class="footer-text">
+        © @DateTime.Now.Year Hospital Management
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
