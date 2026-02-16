@@ -21,7 +21,6 @@ namespace HospitalManagement.Controllers
         /// Post
         /// </summary>
         /// <returns></returns>
-        [HttpPost]
         //POST https://localhots:5580/Logins/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -52,11 +51,12 @@ namespace HospitalManagement.Controllers
             return View(new LoginModel());
         }
 
+
         private IActionResult RedirectToRoleBasedDashBoard(int roleId)
         {
             switch (roleId)
             {
-                case 1: return RedirectToAction("Index", "Doctor");
+                case 1: return RedirectToAction("TodayAppointments", "Doctor");
                 case 2: return RedirectToAction("Index", "Receptionist");
                 case 3: return RedirectToAction("Index", "Receptionists");
                 default: return RedirectToAction("Login", "Logins");

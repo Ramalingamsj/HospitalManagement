@@ -10,6 +10,7 @@ namespace HospitalManagement.Service
         {
             _repo = repo;
         }
+        
         public Users LoginService(string username, string password)
         {
             return _repo.Login(username, password);

@@ -13,7 +13,7 @@ namespace HospitalManagement.Repository
         {
             _connectionString = configuration.GetConnectionString("ConnStringMVC");
         }
-
+       
         public Users Login(string username, string password)
         {
             using SqlConnection connection = ConnectionManager.OpenConnection(_connectionString);

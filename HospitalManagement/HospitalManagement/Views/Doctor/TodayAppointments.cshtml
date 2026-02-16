@@ -1,0 +1,131 @@
+﻿@model List<HospitalManagement.ViewModels.DoctorAppointmentVM>
+
+<h2 class="mb-3">Today's Appointments</h2>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Token</th>
+            <th>Patient</th>
+            <th>Gender</th>
+            <th>Contact</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th width="160">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TokenNo</td>
+                <td>@item.PatientName</td>
+                <td>@item.Gender</td>
+                <td>@item.Contact</td>
+                <td>@item.SlotTime</td>
+                <td>
+                    @if (item.StatusName == "Completed")
+                    {
+                        <span class="badge bg-success">Completed</span>
+                    }
+                    else
+                    {
+
+                        <span class="badge bg-warning text-dark">@item.StatusName</span>
+                    }
+                </td>
+
+                <td>
+                    @if (item.StatusName == "Completed")
+                    {
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            Done
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary btn-sm openModal"
+                                data-id="@item.AppointmentId">
+                            Add Consultation
+                        </button>
+                    }
+            </td>
+        </tr>
+
+                }
+    </tbody>
+
+</table>
+
+<!-- ================= MODAL ================= -->
+
+<div class="modal fade" id="consultationModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" asp-action="AddConsultation">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5>Add Consultation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="AppointmentId" id="appointmentId" />
+
+                    <div class="mb-3">
+                        <label>Symptoms</label>
+                        <textarea name="Symptoms" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Diagnosis</label>
+                        <textarea name="Diagnosis" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Doctor Notes</label>
+                        <textarea name="DoctorNotes" class="form-control"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        Save Consultation
+                    </button>
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+
+<script>
+    document.querySelectorAll(".openModal").forEach(btn => {
+
+        btn.addEventListener("click", function () {
+
+            document.getElementById("appointmentId").value =
+                this.getAttribute("data-id");
+
+            var modal = new bootstrap.Modal(
+                document.getElementById("consultationModal")
+            );
+
+            modal.show();
+        });
+
+    });
+</script>
