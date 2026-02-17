@@ -1,5 +1,14 @@
 ﻿@model List<HospitalManagement.ViewModels.DoctorAppointmentVM>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 <h2 class="mb-3">Today's Appointments</h2>
 
 <table class="table table-bordered table-striped">
@@ -11,7 +20,7 @@
             <th>Contact</th>
             <th>Time</th>
             <th>Status</th>
-            <th width="160">Action</th>
+            <th width="220">Action</th>
         </tr>
     </thead>
 
@@ -25,6 +34,7 @@
                 <td>@item.Gender</td>
                 <td>@item.Contact</td>
                 <td>@item.SlotTime</td>
+
                 <td>
                     @if (item.StatusName == "Completed")
                     {
@@ -32,34 +42,56 @@
                     }
                     else
                     {
-
                         <span class="badge bg-warning text-dark">@item.StatusName</span>
                     }
                 </td>
 
                 <td>
-                    @if (item.StatusName == "Completed")
+
+                    <!-- CONSULTATION BUTTON -->
+                    @if (item.StatusName != "Completed")
+                    {
+                        <button class="btn btn-primary btn-sm openModal"
+                                data-id="@item.AppointmentId">
+                            Consultation
+                        </button>
+                    }
+                    else
                     {
                         <button class="btn btn-secondary btn-sm" disabled>
                             Done
                         </button>
                     }
-                    else
+
+                    @if (item.StatusName == "Completed")
                     {
-                        <button class="btn btn-primary btn-sm openModal"
+                        <button class="btn btn-success btn-sm ms-1 openMedicineModal"
                                 data-id="@item.AppointmentId">
-                            Add Consultation
+                            Medicine
+                        </button>
+                        <button class="btn btn-info btn-sm ms-1 openLabModal"
+                                data-id="@item.AppointmentId">
+                            Lab Test
                         </button>
                     }
-            </td>
-        </tr>
+                    else
+                    {
+                        <button class="btn btn-secondary btn-sm ms-1" disabled>
+                            Add Consultation First
+                        </button>
+                    }
 
-                }
+                </td>
+
+            </tr>
+        }
+
     </tbody>
-
 </table>
 
-<!-- ================= MODAL ================= -->
+
+
+<!-- ================= CONSULTATION MODAL ================= -->
 
 <div class="modal fade" id="consultationModal">
     <div class="modal-dialog">
@@ -97,6 +129,7 @@
                     <button type="submit" class="btn btn-success">
                         Save Consultation
                     </button>
+
                     <button type="button" class="btn btn-secondary"
                             data-bs-dismiss="modal">
                         Cancel
@@ -107,11 +140,136 @@
 
         </div>
     </div>
+</div>
 
+<!-- ================= MEDICINE MODAL ================= -->
+
+<div class="modal fade" id="medicineModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" asp-action="AddMedicine">
+
+                <div class="modal-header bg-success text-white">
+                    <h5>Add Medicine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="AppointmentId" id="medAppointmentId" />
+
+                    <!-- Medicine Dropdown -->
+                    <div class="mb-3">
+                        <label>Medicine</label>
+                        <select name="MedicineId" class="form-control" required>
+                            <option value="">-- Select Medicine --</option>
+
+                            @foreach (var m in ViewBag.Medicines)
+                            {
+                                <option value="@m.MedicineId">@m.MedicineName</option>
+                            }
+
+                        </select>
+                    </div>
+
+                    <!-- Frequency -->
+                    <div class="mb-3">
+                        <label>Frequency (per day)</label>
+                        <input type="number" name="Frequency" class="form-control" required />
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="mb-3">
+                        <label>Duration (days)</label>
+                        <input type="number" name="DurationDays" class="form-control" required />
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        Add Medicine
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+<!-- ================= LAB TEST MODAL ================= -->
+
+<div class="modal fade" id="labTestModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" asp-action="AddLabTest">
+
+                <div class="modal-header bg-info text-white">
+                    <h5>Add Lab Test</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Hidden AppointmentId -->
+                    <input type="hidden" name="AppointmentId" id="labAppointmentId" />
+
+                    <!-- Lab Test Dropdown -->
+                    <div class="mb-3">
+                        <label>Lab Test</label>
+                        <select name="LabTestId" class="form-control" required>
+
+                            <option value="">-- Select Test --</option>
+
+                            @foreach (var t in ViewBag.LabTests)
+                            {
+                                <option value="@t.LabTestId">@t.TestName</option>
+                            }
+
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        Add Test
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 </div>
 
 <!-- ================= SCRIPT ================= -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
 
+        document.querySelectorAll(".openMedicineModal").forEach(btn => {
+            btn.addEventListener("click", function () {
+                document.getElementById("medAppointmentId").value =
+                    this.getAttribute("data-id");
+
+                new bootstrap.Modal(
+                    document.getElementById("medicineModal")
+                ).show();
+            });
+        });
+
+    });
+</script>
 <script>
     document.querySelectorAll(".openModal").forEach(btn => {
 
@@ -125,6 +283,21 @@
             );
 
             modal.show();
+        });
+
+    });
+</script>
+<script>
+    document.querySelectorAll(".openLabModal").forEach(btn => {
+
+        btn.addEventListener("click", function () {
+
+            document.getElementById("labAppointmentId").value =
+                this.getAttribute("data-id");
+
+            new bootstrap.Modal(
+                document.getElementById("labTestModal")
+            ).show();
         });
 
     });

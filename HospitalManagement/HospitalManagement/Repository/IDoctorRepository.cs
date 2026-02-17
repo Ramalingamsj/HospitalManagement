@@ -1,4 +1,5 @@
-﻿using HospitalManagement.ViewModels;
+﻿using HospitalManagement.Models;
+using HospitalManagement.ViewModels;
 
 namespace HospitalManagement.Repository
 {
@@ -6,6 +7,11 @@ namespace HospitalManagement.Repository
     {
         public int GetDoctorIdByUserId(int userId);
         List<DoctorAppointmentVM> GetTodayAppointments(int doctorId);
-        public void AddConsultation(ConsultationVM model);
+        public void AddPrescription(DoctorPrescription model);
+        public List<LabTest> GetAllLabTests();
+        public int AddConsultation(ConsultationVM model);
+        public int GetConsultationIdByAppointment(int appointmentId);
+        public List<Medicine> GetAllMedicines();
+        public void AddLabTest(int consultationId, int labTestId);
     }
 }
