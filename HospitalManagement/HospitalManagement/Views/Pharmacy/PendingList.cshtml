@@ -8,6 +8,10 @@
 @{
     Layout = "~/Views/Shared/_PharmacyLayout.cshtml";
 }
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
 <div class="container mt-4">
 
     <h3 class="mb-3 text-primary">Pending Medicines</h3>

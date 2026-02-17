@@ -1,5 +1,4 @@
 ﻿using HospitalManagement.Models;
-using HospitalManagement.Repository;
 using HospitalManagement.Service;
 using Microsoft.AspNetCore.Mvc;
 using QuestPDF.Fluent;
@@ -15,10 +14,12 @@ namespace HospitalManagement.Controllers
         {
             _service = service;
         }
+
+        // ================= DOWNLOAD BILL =================
         public IActionResult DownloadBill(int id)
         {
             var patientName = _service.GetPatientNameService(id) ?? "Unknown";
-            var total = _service.GetBillAmountService(id);   // 👈 ADD THIS
+            var total = _service.GetBillAmountService(id);
 
             var pdf = Document.Create(container =>
             {
@@ -32,7 +33,7 @@ namespace HospitalManagement.Controllers
                         col.Item().Text($"Patient : {patientName}");
                         col.Item().Text($"Consultation ID : {id}");
                         col.Item().Text($"Date : {DateTime.Now:dd-MM-yyyy}");
-                        col.Item().Text($"Total Amount : ₹ {total}")  // 👈 ADD
+                        col.Item().Text($"Total Amount : ₹ {total}")
                             .FontSize(16).Bold().FontColor(Colors.Green.Darken2);
                     });
                 });
@@ -42,6 +43,8 @@ namespace HospitalManagement.Controllers
 
             return File(pdf, "application/pdf", $"{safeName}_Bill.pdf");
         }
+
+        // ================= PENDING PAGE =================
         public IActionResult PendingList()
         {
             var data = _service.GetPendingMedicinesService();
@@ -54,6 +57,7 @@ namespace HospitalManagement.Controllers
             return View(data);
         }
 
+        // ================= ISSUE MEDICINE =================
         public IActionResult Issue(int id)
         {
             var cookie = Request.Cookies["UserId"];
@@ -66,7 +70,6 @@ namespace HospitalManagement.Controllers
             try
             {
                 _service.IssueMedicineService(id, pharmacyUserId);
-
                 TempData["Success"] = "Medicine issued successfully!";
             }
             catch (Exception ex)
@@ -74,33 +77,34 @@ namespace HospitalManagement.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("PendingList");
+            return RedirectToAction(nameof(PendingList));
         }
+
+        // ================= MEDICINE LIST =================
         public IActionResult Index()
         {
             return View(_service.GetMedicinesService());
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
-
+        // ================= ADD MEDICINE =================
         [HttpPost]
         public IActionResult Create(Medicine m)
         {
             _service.AddMedicineService(m);
-            TempData["Success"] = "Medicine Added Successfully";
-            return RedirectToAction("Index");
+            TempData["Success"] = "Medicine added successfully!";
+            return RedirectToAction(nameof(Index));
         }
 
+        // ================= UPDATE STOCK =================
         [HttpPost]
         public IActionResult UpdateStock(int id, int stock)
         {
             _service.UpdateStockService(id, stock);
-            TempData["Success"] = "Stock Updated";
-            return RedirectToAction("Index");
+            TempData["Success"] = "Stock updated!";
+            return RedirectToAction(nameof(Index));
         }
+
+        // ================= GENERATE BILL =================
         public IActionResult GenerateBill(int id)
         {
             var result = _service.GenerateMedicineBillService(id);
@@ -110,12 +114,13 @@ namespace HospitalManagement.Controllers
             else
                 TempData["Error"] = result;
 
-            return RedirectToAction("PendingList");
+            return RedirectToAction(nameof(PendingList));
         }
+
+        // ================= BILL LIST =================
         public IActionResult Bills()
         {
-            var bills = _service.GetBillsService();
-            return View(bills);
+            return View(_service.GetBillsService());
         }
     }
 }
