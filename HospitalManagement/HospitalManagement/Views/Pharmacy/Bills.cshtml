@@ -1,0 +1,62 @@
+﻿@model List<BillList>
+
+@{
+    ViewData["Title"] = "Bills";
+}
+@{
+    Layout = "~/Views/Shared/_PharmacyLayout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h3 class="mb-3 text-primary">Generated Bills</h3>
+
+    <table class="table table-bordered table-hover shadow">
+
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Patient</th>
+                <th>Consultation</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th width="130">Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No bills generated
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var bill in Model)
+                {
+                    <tr>
+                        <td><strong>#@bill.BillId</strong></td>
+                        <td>@bill.PatientName</td>
+                        <td>#@bill.ConsultationId</td>
+                        <td class="text-success fw-semibold">₹ @bill.TotalAmount</td>
+                        <td>@bill.CreatedAt.ToString("dd MMM yyyy")</td>
+
+                        <td>
+                            <a asp-action="DownloadBill"
+                               asp-route-id="@bill.ConsultationId"
+                               class="btn btn-outline-primary btn-sm w-100">
+                                Download PDF
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+
+    </table>
+</div>

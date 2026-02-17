@@ -1,0 +1,114 @@
+﻿@using HospitalManagement.ViewModel
+@model IEnumerable<PharmacyPendingVM>
+
+@{
+    ViewData["Title"] = "Pending Medicines";
+}
+
+@{
+    Layout = "~/Views/Shared/_PharmacyLayout.cshtml";
+}
+<div class="container mt-4">
+
+    <h3 class="mb-3 text-primary">Pending Medicines</h3>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            No pending patients
+        </div>
+    }
+    else
+    {
+        foreach (var group in Model.GroupBy(x => x.ConsultationId))
+        {
+            <div class="card shadow mb-4">
+
+                <div class="card-header bg-primary text-white fw-semibold">
+                    Consultation #@group.Key — @group.First().PatientName
+                </div>
+
+                <table class="table table-hover m-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Frequency</th>
+                            <th>Days</th>
+                            <th>Stock</th>
+                            <th width="140">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in group)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.MedicineName</td>
+                                <td>@item.Frequency</td>
+                                <td>@item.DurationDays</td>
+                                <td>
+                                    @if (item.Stock <= 10)
+                                    {
+                                        <span class="badge bg-danger">@item.Stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">@item.Stock</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.StatusId == 7)
+                                    {
+                                        <span class="badge bg-success w-100">Issued</span>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="Issue"
+                                           asp-route-id="@item.PatientMedicineId"
+                                           class="btn btn-warning btn-sm w-100">
+                                            Issue
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @{
+                    bool billExists = ViewBag.GeneratedBills[group.Key];
+                }
+
+                <div class="card-footer text-end">
+
+                    @if (billExists)
+                    {
+                        <span class="badge bg-success me-2">Bill Generated</span>
+
+                        <a asp-action="DownloadBill"
+                           asp-route-id="@group.Key"
+                           class="btn btn-outline-primary">
+                            Download PDF
+                        </a>
+                    }
+                    else if (group.Any(x => x.StatusId != 7))
+                    {
+                        <button class="btn btn-secondary" disabled>
+                            Issue All Medicines First
+                        </button>
+                    }
+                    else
+                    {
+                        <a asp-action="GenerateBill"
+                           asp-route-id="@group.Key"
+                           class="btn btn-primary">
+                            Generate Bill
+                        </a>
+                    }
+
+                </div>
+
+            </div>
+        }
+    }
+</div>
