@@ -1,4 +1,11 @@
 ﻿@model List<HospitalManagement.ViewModels.DoctorAppointmentVM>
+@{
+    ViewData["Title"] = "Medicine Management";
+}
+@{
+    Layout = "~/Views/Shared/_PharmacyLayout.cshtml";
+}
+
 
 @if (TempData["Success"] != null)
 {
