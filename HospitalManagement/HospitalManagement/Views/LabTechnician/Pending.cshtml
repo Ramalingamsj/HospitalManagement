@@ -1,0 +1,35 @@
+﻿@using HospitalManagement.ViewModels
+@model List<LabPendingVM>
+
+<h3>Pending Lab Tests</h3>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Patient</th>
+            <th>Test</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.PatientName</td>
+                <td>@item.TestName</td>
+                <td>
+                    <form method="post" asp-action="UpdateResult">
+                        <input type="hidden" name="id" value="@item.PatientLabTestId" />
+
+                        <input name="result" class="form-control mb-1" required />
+
+                        <button class="btn btn-success btn-sm">
+                            Submit Result
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
