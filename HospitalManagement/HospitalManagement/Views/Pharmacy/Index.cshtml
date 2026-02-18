@@ -1,0 +1,210 @@
+﻿@model List<Medicine>
+
+@{
+    ViewData["Title"] = "Medicine Management";
+}
+@{
+    Layout = "~/Views/Shared/_PharmacyLayout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h3 class="text-primary mb-3">Medicine Inventory</h3>
+
+    <!-- SUCCESS MESSAGE -->
+    
+
+    <!-- TOP BAR -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <input type="text"
+               id="searchBox"
+               class="form-control w-50"
+               placeholder="Search medicine..."
+               onkeyup="searchMedicine()" />
+
+        <button class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#addModal">
+            + Add Medicine
+        </button>
+
+    </div>
+
+    <!-- TABLE -->
+    <table class="table table-bordered table-hover shadow-sm">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Stock</th>
+                <th>Price</th>
+                <th width="150">Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="medTable">
+
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        No medicines available
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var m in Model)
+                {
+                    <tr class="med-row">
+                        <td class="fw-semibold">@m.MedicineName</td>
+                        <td>@m.MedicineType</td>
+
+                        <td>
+                            @if (m.StockQuantity <= 10)
+                            {
+                                <span class="badge bg-danger">@m.StockQuantity</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">@m.StockQuantity</span>
+                            }
+                        </td>
+
+                        <td>₹ @m.Price</td>
+
+                        <td>
+                            <button class="btn btn-warning btn-sm w-100"
+                                    onclick="setStock(@m.MedicineId,@m.StockQuantity)">
+                                Update Stock
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+
+    <div id="noResult"
+         class="text-center text-danger fw-bold mt-2"
+         style="display:none">
+        No matching medicine found
+    </div>
+
+</div>
+
+<!-- ================= ADD MEDICINE MODAL ================= -->
+
+<div class="modal fade" id="addModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form asp-action="Create" method="post">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5>Add Medicine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <label>Name</label>
+                    <input name="MedicineName" class="form-control mb-2" required />
+
+                    <label>Type</label>
+                    <input name="MedicineType" class="form-control mb-2" required />
+
+                    <label>Description</label>
+                    <input name="Description" class="form-control mb-2" />
+
+                    <label>Stock</label>
+                    <input name="StockQuantity" type="number" class="form-control mb-2" required />
+
+                    <label>Price</label>
+                    <input name="Price" type="number" step="0.01" class="form-control mb-2" required />
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= UPDATE STOCK MODAL ================= -->
+
+<div class="modal fade" id="stockModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form asp-action="UpdateStock" method="post">
+
+                <div class="modal-header bg-warning">
+                    <h5>Update Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="medId" />
+
+                    <label>New Stock</label>
+                    <input type="number"
+                           name="stock"
+                           id="stockInput"
+                           class="form-control"
+                           required />
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-success">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+
+<script>
+
+    function setStock(id, stock) {
+        document.getElementById("medId").value = id;
+        document.getElementById("stockInput").value = stock;
+        new bootstrap.Modal(document.getElementById('stockModal')).show();
+    }
+
+    function searchMedicine() {
+
+        let input = document.getElementById("searchBox").value.toLowerCase();
+        let rows = document.querySelectorAll(".med-row");
+        let visible = 0;
+
+        rows.forEach(row => {
+
+            let text = row.innerText.toLowerCase();
+
+            if (text.includes(input)) {
+                row.style.display = "";
+                visible++;
+            }
+            else {
+                row.style.display = "none";
+            }
+        });
+
+        document.getElementById("noResult").style.display =
+            visible === 0 ? "block" : "none";
+    }
+
+</script>

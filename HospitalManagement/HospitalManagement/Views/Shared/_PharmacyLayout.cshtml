@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Pharmacy Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background: #f4f6f9
+        }
+
+        .nav-link {
+            font-weight: 500
+        }
+
+            .nav-link.active {
+                color: #0d6efd !important
+            }
+    </style>
+</head>
+<body>
+
+    <!-- PHARMACY NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+
+            <span class="navbar-brand fw-bold">Pharmacy Panel</span>
+
+            <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="nav">
+
+                <ul class="navbar-nav ms-auto align-items-center">
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Pharmacy" asp-action="PendingList">
+                            Pending
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Pharmacy" asp-action="Index">
+                            Medicines
+                        </a>
+                    </li>
+
+                    <li class="nav-item me-3">
+                        <a class="nav-link" asp-controller="Pharmacy" asp-action="Bills">
+                            Bills
+                        </a>
+                    </li>
+
+                    <!-- LOGOUT BUTTON -->
+                    <li class="nav-item">
+                        <a class="btn btn-danger btn-sm px-3"
+                           asp-controller="Logins"
+                           asp-action="Login">
+                            Logout
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE CONTENT -->
+    <div class="container py-4">
+        @RenderBody()
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

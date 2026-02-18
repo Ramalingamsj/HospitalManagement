@@ -1,5 +1,6 @@
 using HospitalManagement.Repository;
 using HospitalManagement.Service;
+using QuestPDF.Infrastructure;
 
 namespace HospitalManagement
 {
@@ -8,6 +9,8 @@ namespace HospitalManagement
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            QuestPDF.Settings.License = LicenseType.Community;
+
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
