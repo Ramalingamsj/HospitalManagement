@@ -3,18 +3,51 @@
 
 @{
     ViewData["Title"] = "Pending Medicines";
-}
-
-@{
     Layout = "~/Views/Shared/_PharmacyLayout.cshtml";
 }
+
+<style>
+    .page-card {
+        background: white;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 4px 14px rgba(0,0,0,.05);
+    }
+
+    .action-btn {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+        .action-btn:hover {
+            background: #1e40af;
+        }
+
+    .badge-low {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+</style>
+
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
+
 <div class="container mt-4">
 
-    <h3 class="mb-3 text-primary">Pending Medicines</h3>
+    <h3 class="mb-3">Pending Medicines</h3>
 
     @if (Model == null || !Model.Any())
     {
@@ -24,42 +57,50 @@
     }
     else
     {
-        foreach (var group in Model.GroupBy(x => x.ConsultationId))
+        @foreach (var group in Model.GroupBy(x => x.ConsultationId))
         {
-            <div class="card shadow mb-4">
+            var allIssued = group.All(m => m.StatusId == 7);
+            var billExists = ViewBag.GeneratedBills[group.Key];
 
-                <div class="card-header bg-primary text-white fw-semibold">
+            <div class="page-card mb-4">
+
+                <h6 class="mb-3 fw-bold">
                     Consultation #@group.Key — @group.First().PatientName
-                </div>
+                </h6>
 
-                <table class="table table-hover m-0 align-middle">
-                    <thead class="table-light">
+                <table class="table table-bordered table-striped align-middle">
+
+                    <thead class="table-dark">
                         <tr>
                             <th>Medicine</th>
                             <th>Frequency</th>
                             <th>Days</th>
                             <th>Stock</th>
-                            <th width="140">Action</th>
+                            <th width="160">Action</th>
                         </tr>
                     </thead>
 
                     <tbody>
+
                         @foreach (var item in group)
                         {
                             <tr>
+
                                 <td class="fw-semibold">@item.MedicineName</td>
                                 <td>@item.Frequency</td>
                                 <td>@item.DurationDays</td>
+
                                 <td>
                                     @if (item.Stock <= 10)
                                     {
-                                        <span class="badge bg-danger">@item.Stock</span>
+                                        <span class="badge badge-low">@item.Stock</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-success">@item.Stock</span>
+                                        <span class="badge badge-ok">@item.Stock</span>
                                     }
                                 </td>
+
                                 <td>
                                     @if (item.StatusId == 7)
                                     {
@@ -69,21 +110,20 @@
                                     {
                                         <a asp-action="Issue"
                                            asp-route-id="@item.PatientMedicineId"
-                                           class="btn btn-warning btn-sm w-100">
+                                           class="action-btn w-100">
                                             Issue
                                         </a>
                                     }
                                 </td>
+
                             </tr>
                         }
+
                     </tbody>
                 </table>
 
-                @{
-                    bool billExists = ViewBag.GeneratedBills[group.Key];
-                }
 
-                <div class="card-footer text-end">
+                <div class="text-end mt-3">
 
                     @if (billExists)
                     {
@@ -95,7 +135,7 @@
                             Download PDF
                         </a>
                     }
-                    else if (group.Any(x => x.StatusId != 7))
+                    else if (!allIssued)
                     {
                         <button class="btn btn-secondary" disabled>
                             Issue All Medicines First
@@ -115,4 +155,5 @@
             </div>
         }
     }
+
 </div>
