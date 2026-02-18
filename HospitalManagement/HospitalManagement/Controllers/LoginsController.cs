@@ -58,7 +58,7 @@ namespace HospitalManagement.Controllers
             {
                 case 1: return RedirectToAction("Index", "Doctor");
                 case 2: return RedirectToAction("Index", "Receptionist");
-                case 3: return RedirectToAction("Index", "Receptionists");
+                case 3: return RedirectToAction("Pending", "LabTechnician");
                 default: return RedirectToAction("Login", "Logins");
 
             }

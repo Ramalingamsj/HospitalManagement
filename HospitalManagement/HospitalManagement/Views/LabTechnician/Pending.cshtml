@@ -1,0 +1,80 @@
+﻿@using HospitalManagement.ViewModels
+@model List<LabPendingVM>
+@{
+    Layout = "~/Views/Shared/_Lab.cshtml";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<h3>Pending Lab Tests</h3>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Patient</th>
+            <th>Test</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var group in Model.GroupBy(x => x.ConsultationId))
+        {
+            <tr class="table-primary">
+                <td colspan="3">
+                    <b>@group.First().PatientName</b>
+                </td>
+            </tr>
+
+            foreach (var item in group)
+            {
+                <tr>
+                    <td></td>
+                    <td>@item.TestName</td>
+                    <td>
+                        @if (item.StatusId == 1)
+                        {
+                            <form method="post" asp-action="UpdateResult">
+                                <input type="hidden" name="id" value="@item.PatientLabTestId" />
+                                <input name="result" class="form-control mb-1" required />
+                                <button class="btn btn-success btn-sm">Submit</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Result Added</span>
+                        }
+                    </td>
+                </tr>
+            }
+
+            <tr>
+                <td colspan="3" class="text-end">
+
+                    @if (group.All(x => x.StatusId == 2))
+                    {
+                        <form method="post" asp-action="GenerateBill">
+                            <input type="hidden" name="id" value="@group.First().PatientLabTestId" />
+                            <button class="btn btn-warning">
+                                Generate Bill (All Tests)
+                            </button>
+                        </form>
+                    }
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

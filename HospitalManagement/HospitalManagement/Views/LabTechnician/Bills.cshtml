@@ -1,0 +1,33 @@
+﻿@model List<LabBill>
+
+<h3>Lab Bills</h3>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Bill ID</th>
+            <th>Patient</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.BillId</td>
+                <td>@b.PatientName</td>
+                <td>₹ @b.TotalAmount</td>
+                <td>@b.CreatedAt.ToString("dd MMM yyyy")</td>
+                <td>
+                    <a asp-action="PrintBill" asp-route-id="@b.BillId"
+                       class="btn btn-primary btn-sm">
+                        PDF
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
