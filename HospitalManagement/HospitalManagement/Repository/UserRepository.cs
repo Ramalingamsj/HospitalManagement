@@ -1,6 +1,5 @@
-﻿using ClassLibraryADOConnectiion;
+﻿using ClassLibraryDataBaseConnection;
 using HospitalManagement.Models;
-using HospitalManagement.ViewModel;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

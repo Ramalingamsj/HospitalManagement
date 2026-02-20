@@ -41,7 +41,7 @@ namespace HospitalManagement
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Logins}/{action=Login}/{id?}")
+                pattern: "{controller=Receptionist}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
