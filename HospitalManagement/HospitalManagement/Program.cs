@@ -8,6 +8,7 @@ namespace HospitalManagement
     {
         public static void Main(string[] args)
         {
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
             var builder = WebApplication.CreateBuilder(args);
             QuestPDF.Settings.License = LicenseType.Community;
 
