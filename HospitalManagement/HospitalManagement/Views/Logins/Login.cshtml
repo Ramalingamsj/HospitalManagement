@@ -8,168 +8,174 @@
 
 <style>
 
-    /* PAGE */
+    /* BODY */
     body {
-        height: 100vh;
         margin: 0;
+        height: 100vh;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #eef2f7;
-        font-family: "Segoe UI",sans-serif;
+        font-family: 'Segoe UI',sans-serif;
     }
 
-
-    /* CARD */
-    .login-container {
-        width: 750px;
-        height: 420px;
-        display: flex;
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow: 0 20px 45px rgba(0,0,0,.12);
-        background: white;
-    }
-
-
-    /* LEFT SIDE */
+    /* LEFT PANEL */
     .left-panel {
-        width: 45%;
-        background: linear-gradient(135deg,#2563eb,#4f46e5);
+        width: 55%;
         color: white;
         display: flex;
-        flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 40px;
         text-align: center;
+        background: linear-gradient(-45deg,#2563eb,#4f46e5,#06b6d4,#3b82f6);
+        background-size: 400% 400%;
+        animation: gradientMove 12s ease infinite;
     }
 
-        .left-panel i {
-            font-size: 55px;
-            margin-bottom: 15px;
+    @@keyframes gradientMove {
+        0% {
+            background-position: 0% 50%
         }
 
-        .left-panel h2 {
+        50% {
+            background-position: 100% 50%
+        }
+
+        100% {
+            background-position: 0% 50%
+        }
+    }
+
+    .left-content {
+        max-width: 350px;
+    }
+
+        .left-content i {
+            font-size: 70px;
+            margin-bottom: 20px;
+        }
+
+        .left-content h1 {
             font-weight: 700;
-            margin-bottom: 10px;
         }
 
-        .left-panel p {
-            font-size: 14px;
-            opacity: .85;
+        .left-content p {
+            opacity: .9;
         }
 
-
-    /* RIGHT SIDE */
+    /* RIGHT PANEL */
     .right-panel {
-        width: 55%;
-        padding: 45px 40px;
+        width: 45%;
+        background: #f8fafc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
+    /* CARD */
+    .login-card {
+        width: 360px;
+        padding: 40px;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 25px 60px rgba(0,0,0,.15);
+    }
 
     /* TITLE */
-    .login-title {
+    .title {
         font-weight: 700;
-        font-size: 22px;
-        margin-bottom: 25px;
+        text-align: center;
+        margin-bottom: 30px;
     }
-
 
     /* INPUT */
     .input-box {
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 10px 14px;
-        margin-bottom: 18px;
-        display: flex;
-        align-items: center;
-        transition: .2s;
+        position: relative;
+        margin-bottom: 20px;
     }
 
-        .input-box:focus-within {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+        .input-box input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            outline: none;
+            transition: .25s;
         }
+
+            .input-box input:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+            }
 
         .input-box i {
-            color: #9ca3af;
-            margin-right: 10px;
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            color: #94a3b8;
         }
-
-        .input-box input {
-            border: none;
-            outline: none;
-            width: 100%;
-            font-size: 15px;
-        }
-
 
     /* BUTTON */
     .login-btn {
         width: 100%;
+        padding: 12px;
         border: none;
         border-radius: 10px;
-        padding: 11px;
-        font-weight: 600;
-        background: #2563eb;
+        background: linear-gradient(45deg,#2563eb,#4f46e5);
         color: white;
+        font-weight: 600;
         transition: .25s;
     }
 
         .login-btn:hover {
-            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79,70,229,.35);
         }
 
-
     /* ERROR */
-    .error-msg {
+    .error {
         text-align: center;
         color: #dc2626;
-        margin-top: 12px;
-        font-size: 14px;
+        margin-top: 14px;
     }
-
 
     /* FOOTER */
     .footer {
         text-align: center;
-        margin-top: 20px;
+        margin-top: 25px;
         font-size: 13px;
-        color: #9ca3af;
+        color: #94a3b8;
     }
 
 </style>
 
+<!-- LEFT -->
 
-
-<div class="login-container">
-
-    <!-- LEFT SIDE -->
-    <div class="left-panel">
+<div class="left-panel">
+    <div class="left-content">
         <i class="fa-solid fa-hospital"></i>
-        <h2>Hospital</h2>
-        <p>Secure Management Portal<br />Authorized Staff Only</p>
+        <h1>Hospital System</h1>
+        <p>Secure Staff Portal<br />Access Restricted to Authorized Users</p>
     </div>
+</div>
 
+<!-- RIGHT -->
 
-    <!-- RIGHT SIDE -->
-    <div class="right-panel">
+<div class="right-panel">
 
-        <div class="login-title">Sign in to continue</div>
+    <div class="login-card">
+
+        <h4 class="title">Sign In</h4>
 
         <form method="post">
 
             <div class="input-box">
-                <i class="fa-solid fa-user"></i>
-                <input asp-for="Username" placeholder="Username" />
+                <i class="fa fa-user"></i>
+                <input asp-for="Username" placeholder="Username">
             </div>
             <span asp-validation-for="Username" class="text-danger small"></span>
 
 
             <div class="input-box">
-                <i class="fa-solid fa-lock"></i>
-                <input asp-for="Password" type="password" placeholder="Password" />
+                <i class="fa fa-lock"></i>
+                <input asp-for="Password" type="password" placeholder="Password">
             </div>
             <span asp-validation-for="Password" class="text-danger small"></span>
 
@@ -178,7 +184,7 @@
 
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="error-msg">
+                <div class="error">
                     @TempData["ErrorMessage"]
                 </div>
             }
@@ -192,7 +198,6 @@
     </div>
 
 </div>
-
 
 @section Scripts {
     @{

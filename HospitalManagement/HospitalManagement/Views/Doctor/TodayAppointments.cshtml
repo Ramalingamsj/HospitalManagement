@@ -1,150 +1,465 @@
 ﻿@model List<HospitalManagement.ViewModels.DoctorAppointmentVM>
 @{
-    ViewData["Title"] = "Medicine Management";
+    ViewData["Title"] = "Today's Appointments";
     Layout = "~/Views/Shared/_Doctor.cshtml";
 }
 
-<style>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    /* PROFESSIONAL ACTION BUTTON */
-    .action-btn {
-        background: #2563eb;
-        color: white;
-        border: none;
-        padding: 6px 18px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        transition: .2s;
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="fw-bold">Doctor Appointments</h2>
+            <small class="text-muted">
+                Manage consultations, medicines and lab tests
+            </small>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<!-- TABLE -->
+<div class="table-card">
+
+    <table class="table table-hover table-bordered align-middle mb-0">
+
+        <thead class="text-center custom-head">
+            <tr>
+                <th>Profile</th>
+                <th>Token</th>
+                <th>Patient</th>
+                <th>Gender</th>
+                <th>Contact</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody class="text-center">
+             @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                
+                    <td class="text-center">
+                        <div class="avatar-circle">
+                            @item.PatientName.Substring(0, 1).ToUpper()
+                        </div>
+                    </td>
+                   
+
+                    <td>@item.TokenNo</td>
+                    <td>@item.PatientName</td>
+                    <td>@item.Gender</td>
+                    <td>@item.Contact</td>
+                    <td>@item.SlotTime</td>
+
+                    <td>
+                        @if (item.StatusName == "Completed")
+                        {
+                            <span class="badge bg-success">Completed</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">@item.StatusName</span>
+                        }
+                    </td>
+
+                    <td>
+
+                        @if (item.StatusName != "Completed")
+                        {
+                            <button class="btn btn-outline-primary btn-sm openModal"
+                                    data-id="@item.AppointmentId">
+                                <i class="bi bi-clipboard2-pulse"></i> Consult
+                            </button>
+                                <button class="btn btn-outline-secondary btn-sm viewHistoryBtn"
+                                        data-patientid="@item.PatientId">
+                                    <i class="bi bi-clock-history"></i> History
+                                </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-success btn-sm openMedicineModal"
+                                    data-id="@item.AppointmentId">
+                                <i class="bi bi-capsule"></i> Medicine
+                            </button>
+
+                            <button class="btn btn-outline-info btn-sm openLabModal"
+                                    data-id="@item.AppointmentId">
+                                <i class="bi bi-eyedropper"></i> Lab
+                            </button>
+                                <button class="btn btn-info btn-sm"
+                                        onclick="loadLabResults(@item.AppointmentId)">
+                                    View Lab Results
+                                </button>
+
+                        }
+
+                    </td>
+
+                </tr>
+            }
+            }
+            else
+            {
+                <!-- Show message if no records -->
+                <tr>
+                    <td colspan="8" class="text-center">
+                        No patients For Today
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+</div>
+<div class="modal fade" id="labResultModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-info text-white">
+                <h5>Lab Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Result</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="labResultBody"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- HISTORY MODAL -->
+<div class="modal fade" id="historyModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white">
+                <h5>Patient Consultation History</h5>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" id="historySection">
+
+                <div class="text-center text-muted">
+                    Loading history...
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="msgModal">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+
+            <div class="modal-body text-center p-4">
+                <h5 id="msgText" class="mb-3"></h5>
+                <button class="btn btn-primary px-4"
+                        data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    function showMessage(message){
+        document.getElementById("msgText").innerText = message;
+        new bootstrap.Modal(document.getElementById("msgModal")).show();
+    }
+</script>
+<script>
+    function loadLabResults(id) {
+
+        console.log("Loading results for:", id);
+
+        $.get('@Url.Action("GetResults", "Doctor")', { appointmentId: id })
+        .done(function (data) {
+
+            let rows = "";
+
+                data.forEach(r => {
+
+        let resultText = r.result && r.result.trim() !== ""
+            ? r.result
+            : "<span class='text-warning fw-semibold'>Under Process</span>";
+
+        rows += `<tr>
+                    <td>${r.labtest_name}</td>
+                    <td>${resultText}</td>
+                    <td>${r.test_date ?? "-"}</td>
+                 </tr>`;
+    });
+
+            document.getElementById("labResultBody").innerHTML = rows;
+
+            new bootstrap.Modal(document.getElementById("labResultModal")).show();
+        })
+        .fail(function (err) {
+            console.error(err.responseText);
+            alert("Failed to load results");
+        });
     }
 
-        .action-btn:hover {
-            background: #1e40af;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(37,99,235,.35);
+
+
+
+
+
+
+        function loadHistory(patientId) {
+
+        $("#historySection").html("<div class='text-center'>Loading...</div>");
+
+        $.get("/Doctor/GetPatientHistory", { patientId: patientId }, function (data) {
+
+            let html = "";
+
+            if (!data || data.length === 0) {
+                html = "<p class='text-muted'>No previous history found.</p>";
+            }
+            else {
+
+                data.forEach(function (item) {
+
+                    html += `
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="fw-bold text-primary">
+                                        ${new Date(item.consultationDate).toLocaleDateString()}
+                                    </h6>
+                                </div>
+
+                                <p><strong>Symptoms:</strong> ${item.symptoms ?? "-"}</p>
+                                <p><strong>Diagnosis:</strong> ${item.diagnosis ?? "-"}</p>
+                                <p><strong>Doctor Notes:</strong> ${item.doctorNotes ?? "-"}</p>
+
+                                <hr/>
+
+                                <p><strong>Medicine:</strong> ${item.medicineName ?? "-"}</p>
+                                <p><strong>Lab Test:</strong> ${item.labTestName ?? "-"}</p>
+                                <p><strong>Result:</strong> ${item.labResult ?? "-"}</p>
+
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            $("#historySection").html(html);
+
+        }).fail(function () {
+            $("#historySection").html("<p class='text-danger'>Failed to load history.</p>");
+        });
+
+        new bootstrap.Modal(document.getElementById("historyModal")).show();
+    }
+</script>
+<style>
+    .btnBill {
+        margin-left: 2px;
+    }
+
+    .avatar-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,#0d6efd,#6f42c1);
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+        transition: .3s;
+    }
+
+    /* hover animation */
+    tr:hover .avatar-circle {
+        transform: scale(1.15);
+        box-shadow: 0 6px 18px rgba(13,110,253,.4);
+    }
+    /* ===============================
+           SEARCH BAR PROJECTION ANIMATION
+        ==================================*/
+
+    .neo-search {
+        transition: all .35s ease;
+        transform: perspective(800px) scale(1);
+    }
+
+        /* hover projection */
+        .neo-search:hover {
+            transform: perspective(800px) scale(1.03) translateY(-2px);
+            box-shadow: 0 12px 28px rgba(13,110,253,.35), 0 0 0 2px rgba(255,255,255,.2) inset;
         }
+
+        /* focus projection (typing state) */
+        .neo-search:focus-within {
+            transform: perspective(800px) scale(1.04);
+            box-shadow: 0 16px 40px rgba(13,110,253,.45), 0 0 18px rgba(13,110,253,.35);
+        }
+</style>
+<style>
+    /* Smooth animation */
+    #patientTableBody tr {
+        transition: all 0.25s ease-in-out;
+        cursor: pointer;
+    }
+
+        /* Hover effect */
+        #patientTableBody tr:hover {
+            transform: scale(1.07); /* makes row bigger */
+            background-color: #f8fbff; /* light highlight */
+            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+            z-index: 2;
+            position: relative;
+        }
+
+    .table-hover tbody tr:hover td {
+        color: #0d6efd;
+        font-weight: 500;
+    }
 
 </style>
+<style>
 
+    /* Reduce row height */
+    .table td,
+    .table th {
+        padding: 8px 10px; /* default bootstrap = 16px */
+        font-size: 14px;
+    }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
+    /* Compact avatar */
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+    /* Reduce row spacing */
+    .table tbody tr {
+        height: 52px;
+    }
 
-<h2 class="mb-3">Today's Appointments</h2>
+    /* Make buttons compact */
+    .btn-sm {
+        padding: 3px 8px;
+        font-size: 13px;
+        border-radius: 6px;
+    }
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Token</th>
-            <th>Patient</th>
-            <th>Gender</th>
-            <th>Contact</th>
-            <th>Time</th>
-            <th>Status</th>
-            <th width="240">Action</th>
-        </tr>
-    </thead>
+    /* Action column spacing */
+    td:last-child {
+        white-space: nowrap;
+    }
 
-    <tbody>
+    /* Reduce header height */
+    .table thead th {
+        padding: 10px;
+        font-size: 14px;
+    }
 
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.TokenNo</td>
-                <td>@item.PatientName</td>
-                <td>@item.Gender</td>
-                <td>@item.Contact</td>
-                <td>@item.SlotTime</td>
+    .custom-head th {
+        background: rgba(59,130,246,.85) !important;
+        backdrop-filter: blur(8px);
+        color: #fff !important;
+    }
 
-                <td>
-                    @if (item.StatusName == "Completed")
-                    {
-                        <span class="badge bg-success">Completed</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning text-dark">@item.StatusName</span>
-                    }
-                </td>
+    .search-icon i {
+        transition: .3s;
+    }
 
-                <td>
+    .neo-search:hover .search-icon i {
+        transform: scale(1.2) rotate(8deg);
+    }
 
-                    @* BEFORE CONSULTATION *@
-                    @if (item.StatusName != "Completed")
-                    {
-                        <button class="action-btn openModal"
-                                data-id="@item.AppointmentId">
-                            Consultation
-                        </button>
-                    }
-
-                    @* AFTER CONSULTATION *@
-                    else
-                    {
-                        <button class="action-btn openMedicineModal"
-                                data-id="@item.AppointmentId">
-                            Medicine
-                        </button>
-
-                        <button class="action-btn ms-1 openLabModal"
-                                data-id="@item.AppointmentId">
-                            Lab Test
-                        </button>
-                    }
-
-                </td>
-
-            </tr>
-        }
-
-    </tbody>
-</table>
-
-
+</style>
 
 <!-- CONSULTATION MODAL -->
 <div class="modal fade" id="consultationModal">
     <div class="modal-dialog">
         <div class="modal-content">
 
-            <form method="post" asp-action="AddConsultation">
+            <form method="post" asp-action="AddConsultation" id="consultForm">
 
+                <!-- HEADER -->
                 <div class="modal-header bg-primary text-white">
                     <h5>Add Consultation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
+                <!-- BODY -->
                 <div class="modal-body">
 
                     <input type="hidden" name="AppointmentId" id="appointmentId" />
 
+                    <!-- Symptoms -->
                     <div class="mb-3">
-                        <label>Symptoms</label>
-<textarea name="Symptoms" class="form-control" required></textarea>
+                        <label class="fw-semibold">Symptoms *</label>
+                        <textarea name="Symptoms" id="symptoms" class="form-control"></textarea>
+                        <small class="text-danger validation-msg" id="symptomsError"></small>
                     </div>
 
+                    <!-- Diagnosis -->
                     <div class="mb-3">
-                        <label>Diagnosis</label>
-<textarea name="Diagnosis" class="form-control" required></textarea>
+                        <label class="fw-semibold">Diagnosis *</label>
+                        <textarea name="Diagnosis" id="diagnosis" class="form-control"></textarea>
+                        <small class="text-danger validation-msg" id="diagnosisError"></small>
                     </div>
 
+                    <!-- Doctor Notes -->
                     <div class="mb-3">
-                        <label>Doctor Notes</label>
-<textarea name="DoctorNotes" class="form-control"></textarea>
+                        <label class="fw-semibold">Doctor Notes *</label>
+                        <textarea name="DoctorNotes" id="doctorNotes" class="form-control"></textarea>
+                        <small class="text-danger validation-msg" id="notesError"></small>
                     </div>
 
                 </div>
 
+                <!-- FOOTER -->
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Save Consultation</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        Save Consultation
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
                 </div>
 
             </form>
@@ -153,8 +468,124 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const form = document.getElementById("consultForm");
+
+        const symptoms = document.getElementById("symptoms");
+        const diagnosis = document.getElementById("diagnosis");
+        const doctorNotes = document.getElementById("doctorNotes");
+
+        const fields = [
+            { input: symptoms, errorId: "symptomsError", name: "Symptoms" },
+            { input: diagnosis, errorId: "diagnosisError", name: "Diagnosis" },
+            { input: doctorNotes, errorId: "notesError", name: "Doctor Notes" }
+        ];
+
+        const validPattern = /^[a-zA-Z0-9\s.,()-]+$/;
+
+        function showError(input, errorId, message) {
+            document.getElementById(errorId).innerText = message;
+            input.classList.add("is-invalid");
+        }
+
+        function clearError(input, errorId) {
+            document.getElementById(errorId).innerText = "";
+            input.classList.remove("is-invalid");
+        }
+            function validateField(fieldObj) {
+
+        let rawValue = fieldObj.input.value;
+        let value = rawValue.trim();
+
+        // Should not start with space
+        if (rawValue.startsWith(" ")) {
+            showError(fieldObj.input, fieldObj.errorId,
+                fieldObj.name + " should not start with space.");
+            return false;
+        }
+
+        // Required check
+        if (value === "") {
+            showError(fieldObj.input, fieldObj.errorId,
+                fieldObj.name + " is required.");
+            return false;
+        }
+
+        // Minimum 5 characters
+        if (value.length < 5) {
+            showError(fieldObj.input, fieldObj.errorId,
+                fieldObj.name + " must contain at least 5 characters.");
+            return false;
+        }
+
+        // Allowed characters check
+        if (!validPattern.test(value)) {
+            showError(fieldObj.input, fieldObj.errorId,
+                "Invalid Input.");
+            return false;
+        }
+
+        clearError(fieldObj.input, fieldObj.errorId);
+        return true;
+    }
+
+        // Strict field control
+        fields.forEach((field, index) => {
+
+            field.input.addEventListener("blur", function () {
+                if (!validateField(field)) {
+                    field.input.focus();
+                }
+            });
+
+            field.input.addEventListener("keydown", function (e) {
+
+                if (e.key === "Enter") {
+                    e.preventDefault();
+
+                    if (validateField(field)) {
+                        if (index + 1 < fields.length) {
+                            fields[index + 1].input.focus();
+                        }
+                    } else {
+                        field.input.focus();
+                    }
+                }
+            });
+        });
+
+        diagnosis.addEventListener("focus", function () {
+            if (!validateField(fields[0])) {
+                symptoms.focus();
+            }
+        });
+
+        doctorNotes.addEventListener("focus", function () {
+            if (!validateField(fields[1])) {
+                diagnosis.focus();
+            }
+        });
+
+        form.addEventListener("submit", function (e) {
+
+            let isValid = true;
+
+            fields.forEach(field => {
+                if (!validateField(field)) {
+                    isValid = false;
+                }
+            });
 
 
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+    });
+</script>
 <!-- MEDICINE MODAL -->
 <div class="modal fade" id="medicineModal">
     <div class="modal-dialog">
@@ -184,12 +615,24 @@
 
                     <div class="mb-3">
                         <label>Frequency (per day)</label>
-                        <input type="number" name="Frequency" class="form-control" required />
+                        <input type="number"
+                               name="Frequency"
+                               class="form-control"
+                               required
+                               min="1"
+                               max="4"
+                               oninput="if(this.value>4)this.value=4;">
                     </div>
 
                     <div class="mb-3">
                         <label>Duration (days)</label>
-                        <input type="number" name="DurationDays" class="form-control" required />
+                        <input type="number"
+                               name="DurationDays"
+                               class="form-control"
+                               required
+                               min="1"
+                               max="30"
+                               oninput="if(this.value>30)this.value=30;">
                     </div>
 
                 </div>
@@ -246,11 +689,85 @@
         </div>
     </div>
 </div>
+@if (TempData["Success"] != null)
+{
+    <script>
+        showMessage("@TempData["Success"]");
+    </script>
+}
 
+@if (TempData["Error"] != null)
+{
+    <script>
+        showMessage("@TempData["Error"]");
+    </script>
+}
 
 
 <!-- SCRIPTS -->
 <script>
+
+    @* Counseltation histroy *@
+            function loadHistory(patientId) {
+
+        $("#historySection").html("<div class='text-center'>Loading...</div>");
+
+        $.get("/Doctor/GetPatientHistory", { patientId: patientId }, function (data) {
+
+            let html = "";
+
+            if (!data || data.length === 0) {
+                html = "<p class='text-muted'>No previous history found.</p>";
+            }
+            else {
+
+                data.forEach(function (item) {
+
+                    html += `
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="fw-bold text-primary">
+                                        ${new Date(item.consultationDate).toLocaleDateString()}
+                                    </h6>
+                                </div>
+
+                                <p><strong>Symptoms:</strong> ${item.symptoms ?? "-"}</p>
+                                <p><strong>Diagnosis:</strong> ${item.diagnosis ?? "-"}</p>
+                                <p><strong>Doctor Notes:</strong> ${item.doctorNotes ?? "-"}</p>
+
+                                <hr/>
+
+                                <p><strong>Medicine:</strong> ${item.medicineName ?? "-"}</p>
+                                <p><strong>Lab Test:</strong> ${item.labTestName ?? "-"}</p>
+                                <p><strong>Result:</strong> ${item.labResult ?? "-"}</p>
+
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            $("#historySection").html(html);
+
+        }).fail(function () {
+            $("#historySection").html("<p class='text-danger'>Failed to load history.</p>");
+        });
+
+        new bootstrap.Modal(document.getElementById("historyModal")).show();
+    }
+
+
+        document.querySelectorAll(".viewHistoryBtn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            loadHistory(this.dataset.patientid);
+        });
+    });
+
+
+
+
     document.querySelectorAll(".openModal").forEach(btn=>{
     btn.addEventListener("click",function(){
     document.getElementById("appointmentId").value=this.dataset.id;
@@ -272,3 +789,205 @@
     });
     });
 </script>
+<style>
+    .table-card {
+        width: 100%;
+        margin: 0; /* remove outer spacing */
+        padding: 0px; /* reduce inner gap */
+        border-radius: 0px;
+        background: rgba(255,255,255,.95);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 12px 28px rgba(0,0,0,.18);
+    }
+
+        /* subtle hover lift */
+        .table-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 30px 70px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.7) inset;
+        }
+
+    /* HEADER */
+    .custom-head th {
+        background: linear-gradient(135deg,#3b82f6,#2563eb);
+        color: white;
+        border: none;
+        padding: 14px;
+    }
+
+    /* ROW HOVER EFFECT */
+    tbody tr {
+        transition: .25s;
+        cursor: pointer;
+    }
+
+        tbody tr:hover {
+            transform: scale(1.05);
+            background: #f8fbff;
+            box-shadow: 0 8px 18px rgba(0,0,0,.15);
+            z-index: 2;
+            position: relative;
+        }
+
+    /* ===== SEARCH BAR ===== */
+    .neo-search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        height: 48px;
+        padding: 6px;
+        border-radius: 40px;
+        background: linear-gradient(135deg,#1e3a8a,#1d4ed8);
+        box-shadow: 0 10px 25px rgba(30,64,175,.25);
+        transition: .35s;
+    }
+
+        .neo-search:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 14px 35px rgba(37,99,235,.35);
+        }
+
+        .neo-search:focus-within {
+            box-shadow: 0 0 0 2px #93c5fd,0 14px 40px rgba(37,99,235,.45);
+        }
+
+    /* icon */
+    .search-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1e40af;
+        font-size: 16px;
+    }
+
+    /* input */
+    .neo-search input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: white;
+        padding: 0 12px;
+    }
+
+        .neo-search input::placeholder {
+            color: rgba(255,255,255,.7);
+        }
+
+    
+
+    body {
+        background: linear-gradient(120deg,#c7d2fe,#dbeafe,#bfdbfe,#c7d2fe);
+        background-size: 400% 400%;
+        animation: gradientFlow 14s ease infinite;
+        overflow-x: hidden;
+    }
+
+    @@keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+
+    /* ===============================
+           STRONG GLOW ORBS
+        ================================ */
+
+    body::before,
+    body::after {
+        content: "";
+        position: fixed;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        filter: blur(120px);
+        z-index: -1;
+    }
+
+    /* blue glow */
+    body::before {
+        background: radial-gradient(circle,#2563eb,#1d4ed800 70%);
+        top: -180px;
+        left: -160px;
+        animation: float1 18s linear infinite;
+    }
+
+    /* purple glow */
+    body::after {
+        background: radial-gradient(circle,#7c3aed,#6d28d900 70%);
+        bottom: -200px;
+        right: -180px;
+        animation: float2 22s linear infinite;
+    }
+
+    @@keyframes float1 {
+        0% {
+            transform: translate(0,0)
+        }
+
+        50% {
+            transform: translate(220px,130px)
+        }
+
+        100% {
+            transform: translate(0,0)
+        }
+    }
+
+    @@keyframes float2 {
+        0% {
+            transform: translate(0,0)
+        }
+
+        50% {
+            transform: translate(-220px,-150px)
+        }
+
+        100% {
+            transform: translate(0,0)
+        }
+    }
+
+
+    /* ===============================
+           STRONG GRID VISIBILITY
+        ================================ */
+
+    html::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(rgba(0,0,0,.09) 1px,transparent 1px), linear-gradient(90deg,rgba(0,0,0,.09) 1px,transparent 1px);
+        background-size: 45px 45px;
+        z-index: -2;
+    }
+
+    .neon-btn {
+        border: 2px solid #3b82f6;
+        color: #3b82f6;
+        background: transparent;
+        font-weight: 600;
+        padding: 8px 20px;
+        border-radius: 25px;
+        transition: .3s;
+    }
+
+        .neon-btn:hover {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 0 15px #3b82f6, 0 0 30px #3b82f6;
+        }
+</style>

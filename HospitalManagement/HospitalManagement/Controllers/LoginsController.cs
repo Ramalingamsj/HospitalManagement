@@ -1,11 +1,14 @@
 ﻿using HospitalManagement.Models;
 using HospitalManagement.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace HospitalManagement.Controllers
 {
+
     public class LoginsController : Controller
     {
+        
         private readonly IUserService _userService;
         //DI
         public LoginsController(IUserService userService)
@@ -33,12 +36,9 @@ namespace HospitalManagement.Controllers
                 if (availableUser != null)
                 {
                     //Stores in cookies
-                    Response.Cookies.Append("UserId", availableUser.UserId.ToString(),
-                        new CookieOptions { Expires = DateTime.Now.AddHours(1) });
-                    Response.Cookies.Append("UserName", availableUser.Username,
-                        new CookieOptions { Expires = DateTime.Now.AddHours(1) });
-                    Response.Cookies.Append("RoleId", availableUser.RoleId.ToString(),
-                        new CookieOptions { Expires = DateTime.Now.AddHours(1) });
+                    HttpContext.Session.SetString("UserId", availableUser.UserId.ToString());
+                    HttpContext.Session.SetString("UserName", availableUser.Username);
+                    HttpContext.Session.SetString("RoleId", availableUser.RoleId.ToString());
 
                     //Show Message on landing Page
                     TempData["SuccessMessage"] = $"Welcome,{availableUser.Username}!";
@@ -64,6 +64,13 @@ namespace HospitalManagement.Controllers
                 default: return RedirectToAction("Login", "Logins");
 
             }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using HospitalManagement.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 namespace HospitalManagement.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     public class LabTechnicianController : Controller
     {
         private readonly ILabTechnicianService _service;
@@ -19,10 +21,34 @@ namespace HospitalManagement.Controllers
             return View(_service.GetPendingTests());
         }
 
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            context.HttpContext.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            context.HttpContext.Response.Headers["Pragma"] = "no-cache";
+            context.HttpContext.Response.Headers["Expires"] = "0";
+
+            var userId = HttpContext.Session.GetString("UserId");
+            var roleId = HttpContext.Session.GetString("RoleId");
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleId))
+            {
+                context.Result = RedirectToAction("Login", "Logins");
+                return;
+            }
+
+            base.OnActionExecuting(context);
+        }
         [HttpPost]
         public IActionResult UpdateResult(int id, string result)
         {
-            int userId = Convert.ToInt32(Request.Cookies["UserId"]);
+            var userIdString = HttpContext.Session.GetString("UserId");
+
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Logins");
+            }
+
+            int userId = Convert.ToInt32(userIdString);
 
             _service.UpdateResult(id, result, userId);
 

@@ -1,13 +1,32 @@
 ﻿using HospitalManagement.Models;
 using HospitalManagement.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 
 namespace HospitalManagement.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     public class PharmacyController : Controller
     {
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            context.HttpContext.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            context.HttpContext.Response.Headers["Pragma"] = "no-cache";
+            context.HttpContext.Response.Headers["Expires"] = "0";
+
+            var userId = HttpContext.Session.GetString("UserId");
+            var roleId = HttpContext.Session.GetString("RoleId");
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleId))
+            {
+                context.Result = RedirectToAction("Login", "Logins");
+                return;
+            }
+
+            base.OnActionExecuting(context);
+        }
         private readonly IPharmacyService _service;
 
         public PharmacyController(IPharmacyService service)
@@ -60,12 +79,19 @@ namespace HospitalManagement.Controllers
         // ================= ISSUE MEDICINE =================
         public IActionResult Issue(int id)
         {
-            var cookie = Request.Cookies["UserId"];
+            var userIdString = HttpContext.Session.GetString("UserId");
 
-            if (cookie == null)
-                return RedirectToAction("Login", "Auth");
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Logins");
+            }
 
-            int pharmacyUserId = Convert.ToInt32(cookie);
+            int userId = Convert.ToInt32(userIdString);
+
+            if (userId == null)
+                return RedirectToAction("Logins", "Login");
+
+            int pharmacyUserId = Convert.ToInt32(userId);
 
             try
             {

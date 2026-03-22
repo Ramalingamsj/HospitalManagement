@@ -1,0 +1,1334 @@
+﻿@model IEnumerable<HospitalManagement.Models.Patient>
+
+@{
+    ViewData["Title"] = "Patient List";
+}
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<div class="container mt-4">
+
+    <!-- ✅ NEW PROFESSIONAL HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2 class="fw-bold">Patient Management</h2>
+            <small class="text-muted">
+                Manage and book patient appointments
+            </small>
+        </div>
+
+        <button class="btn neon-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#createPatientModal">
+            Register Patient
+        </button>
+
+    </div>
+</div>
+<!--searchbutton-->
+
+<div class="container mt-3">
+
+    <div class="neo-search">
+
+        <div class="search-icon minimal">
+            <i class="bi bi-search"></i>
+        </div>
+
+        <input type="text"
+               id="searchInput"
+               placeholder="Search patient by name or phone..." />
+
+        <button id="btnSearch" class="search-btn">Search</button>
+        <button id="btnReset" class="reset-btn">Reset</button>
+
+    </div>
+
+</div>
+
+
+
+
+<!----
+    We removed Create, Edit, Delete links.
+    
+    --->
+
+ 
+<div class="table-card">
+    <table class="table table-hover table-bordered align-middle mb-0">
+        <thead class="text-center custom-head">
+        <tr>
+            <!-- Column headers written manually -->
+            <th>Profile</th>
+            <th>MMRID</th>
+            <th>Patient Name</th>
+            <th>Date of Birth</th>
+            <th>Gender</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Created At</th>
+             <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody id="patientTableBody">
+
+        <!--
+            Check if Model has data.
+            Prevents null reference error.
+        -->
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+            
+                <tr>
+                    <td class="text-center">
+                        <div class="avatar-circle">
+                            @item.PatientName.Substring(0, 1).ToUpper()
+                        </div>
+                    </td>
+                    <td>PAT-@item.PatientId.ToString("D4")</td>
+
+
+                    <td>@item.PatientName</td>
+
+                    <!-- Format date properly -->
+                    <td>@(item.Dob?.ToString("dd-MM-yyyy"))</td>
+
+                    <td>@item.Gender</td>
+
+                    <td>@item.Contact</td>
+
+                    <td>@item.Email</td>
+
+                    <td>@item.Address</td>
+
+                    <td>@(item.CreatedAt?.ToString("dd-MM-yyyy"))</td>
+                    <!--adding edit button for each row-->
+
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm btnEdit"
+                                    data-id="@item.PatientId">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+
+                           <button class="btn btn-outline-success btn-sm btnBook"
+        data-id="@item.PatientId"
+        data-name="@item.PatientName">
+    <i class="bi bi-calendar-check"></i> Book
+</button>
+
+
+                        </td>
+
+                   
+
+                </tr>
+            }
+        }
+        else
+        {
+            <!-- Show message if no records -->
+            <tr>
+                <td colspan="8" class="text-center">
+                    No patients found
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+</div>
+
+<!-- Patient Create Modal -->
+<div class="modal fade"
+     id="createPatientModal"
+     tabindex="-1"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Create Patient</h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form id="createPatientForm">
+
+                    @Html.AntiForgeryToken()
+
+                    <!-- Patient Name -->
+                    <div class="form-group mb-2">
+                        <label>Patient Name *</label>
+                        <input name="PatientName" id="PatientName" class="form-control" />
+                        <span class="text-danger" data-valmsg-for="PatientName"></span>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group mb-2">
+                        <label>Gender *</label>
+                        <select name="Gender" id="Gender" class="form-control">
+                            <option value="">-- Select Gender --</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                        <span class="text-danger" data-valmsg-for="Gender"></span>
+                    </div>
+
+                    <!-- DOB -->
+                    <div class="form-group mb-2">
+                        <label>DOB *</label>
+                        <input type="date" name="Dob" id="Dob" class="form-control" />
+                        <span class="text-danger" data-valmsg-for="Dob"></span>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="form-group mb-2">
+                        <label>Contact *</label>
+                        <input name="Contact" id="Contact" class="form-control" />
+                        <span class="text-danger" data-valmsg-for="Contact"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group mb-2">
+                        <label>Email</label>
+                        <input name="Email" id="Email" class="form-control" />
+                        <span class="text-danger" data-valmsg-for="Email"></span>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group mb-2">
+                        <label>Address</label>
+                        <textarea name="Address" id="Address" class="form-control"></textarea>
+                        <span class="text-danger" data-valmsg-for="Address"></span>
+                    </div>
+
+                </form>
+
+                
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button type="button"
+                        id="btnSavePatient"
+                        class="btn btn-primary">
+                    Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!---load data for edit modal-->
+<div class="modal fade"
+     id="EditPatientModal"
+     tabindex="-1"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <!-- ================= HEADER ================= -->
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Patient</h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <!-- ================= BODY ================= -->
+            <div class="modal-body">
+
+                <form id="EditPatientForm">
+
+                    <!-- AntiForgery Token -->
+                    @Html.AntiForgeryToken()
+
+                    <!-- Hidden Patient ID -->
+                    <input type="hidden" id="edit_patientId" />
+
+                    <!-- Patient Name -->
+                    <div class="form-group">
+                        <label>Patient Name <span class="text-danger">*</span></label>
+                        <input class="form-control fw-bold"
+                               id="edit_patientName"
+                               autocomplete="off" />
+                        <span id="patientNameError" class="text-danger"></span>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group">
+                        <label>Gender <span class="text-danger">*</span></label>
+
+                        <div>
+                            <input type="radio"
+                                   name="EditGender"
+                                   value="Male" />
+                            <label>Male</label>
+                        </div>
+
+                        <div>
+                            <input type="radio"
+                                   name="EditGender"
+                                   value="Female" />
+                            <label>Female</label>
+                        </div>
+
+                        <div>
+                            <input type="radio"
+                                   name="EditGender"
+                                   value="Other" />
+                            <label>Other</label>
+                        </div>
+
+                        <span id="genderError" class="text-danger"></span>
+                    </div>
+
+                    <!-- DOB -->
+                    <div class="form-group">
+                        <label>DOB <span class="text-danger">*</span></label>
+                        <input class="form-control"
+                               id="edit_dob"
+                               type="date"
+                               autocomplete="off" />
+                        <span id="dobError" class="text-danger"></span>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="form-group">
+                        <label>Contact <span class="text-danger">*</span></label>
+                        <input class="form-control"
+                               id="edit_contact"
+                               autocomplete="off" />
+                        <span id="contactError" class="text-danger"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input class="form-control"
+                               id="edit_email"
+                               autocomplete="off" />
+                        <span id="emailError" class="text-danger"></span>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input class="form-control"
+                               id="edit_address"
+                               autocomplete="off" />
+                        <span id="addressError" class="text-danger"></span>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- ================= FOOTER ================= -->
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button type="button"
+                        id="btnUpdatePatient"
+                        class="btn btn-primary">
+                    Update
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<!----book appointment modal--->
+<div class="modal fade"
+     id="BookAppointmentModal"
+     tabindex="-1"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+                <h5 class="modal-title">Book Appointment</h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <form id="BookAppointmentForm">
+
+                    @Html.AntiForgeryToken()
+
+                    <!-- Hidden Patient ID -->
+                    <input type="hidden" id="booking_patientId" />
+
+                    <!-- Patient Name -->
+                    <div class="form-group mb-2">
+                        <label>Patient</label>
+                        <input type="text"
+                               id="booking_patientName"
+                               class="form-control"
+                               readonly />
+                    </div>
+
+                   
+
+                    <!-- Doctor -->
+                    <div class="form-group mb-2">
+                        <label>Doctor <span class="text-danger">*</span></label>
+                        <select id="doctorSelect" class="form-control">
+                            <option value="">-- Select Doctor --</option>
+                            @foreach (var d in ViewBag.Doctors)
+                            {
+                                <option value="@d.DoctorId">
+                                    @d.FullName (@d.SpecializationName)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="form-group mb-2">
+                        <label>Date <span class="text-danger">*</span></label>
+                        <input type="date"
+                               id="appointmentDate"
+                               class="form-control"
+                               min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <!-- Slot -->
+                    <div class="form-group mb-2">
+                        <label>Available Slots <span class="text-danger">*</span></label>
+                        <select id="slotSelect" class="form-control">
+                            <option value="">-- Select Slot --</option>
+                        </select>
+                    </div>
+
+                   
+
+
+                </form>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button type="button"
+                        id="btnBookAppointment"
+                        class="btn btn-primary">
+                    Book
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!--billmodal--->
+<div class="modal fade" id="ConsultationBillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Consultation Bill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" id="billPrintArea" >
+
+                <p><strong>Appointment ID:</strong> <span id="billAppointmentId"></span></p>
+                <p><strong>Date:</strong> <span id="billDate"></span></p>
+                <p><strong>Patient:</strong> <span id="billPatient"></span></p>
+                <p><strong>Doctor:</strong> <span id="billDoctor"></span></p>
+                <p><strong>Specialization:</strong> <span id="billSpecialization"></span></p>
+                <p><strong>Consultation Fee:</strong> ₹ <span id="billFee"></span></p>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="printBill()">Print</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+
+     <!-- jQuery CDN -->
+      
+
+
+   <script>
+     $(document).ready(function () {
+
+            $("#btnSavePatient").click(function (e) {
+
+                e.preventDefault();
+
+                $(".text-danger").text("");
+                var hasError = false;
+
+                var pname = $("#PatientName").val().trim();
+                var pgender = $("#Gender").val();
+                var pdob = $("#Dob").val();
+                var pcontact = $("#Contact").val().trim();
+                var pemail = $("#Email").val().trim();
+                var paddress = $("#Address").val().trim();
+
+                // ===== VALIDATION =====
+
+                if (!pname) {
+                    $("span[data-valmsg-for='PatientName']").text("Patient name is required");
+                    hasError = true;
+                }
+
+                if (!pgender) {
+                    $("span[data-valmsg-for='Gender']").text("Gender is required");
+                    hasError = true;
+                }
+
+                if (!pcontact) {
+                    $("span[data-valmsg-for='Contact']").text("Contact is required");
+                    hasError = true;
+                }
+                else if (!/^[0-9]{10}$/.test(pcontact)) {
+                    $("span[data-valmsg-for='Contact']").text("Contact must be 10 digits");
+                    hasError = true;
+                }
+
+                if (!paddress) {
+                    $("span[data-valmsg-for='Address']").text("Address is required");
+                    hasError = true;
+                }
+
+                if (hasError) return;
+
+                // ===== OBJECT =====
+
+                var patientData = {
+                    PatientName: pname,
+                    Gender: pgender,
+                    Dob: pdob,
+                    Contact: pcontact,
+                    Email: pemail,
+                    Address: paddress
+                };
+
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    type: "POST",
+                   url: '@Url.Action("InsertPatient", "Receptionist")',
+                    data: patientData,
+                    headers: { "RequestVerificationToken": token },
+
+                    success: function (response) {
+
+                        if (response.success) {
+
+                            $("#createPatientModal").modal("hide");
+                            alert("Patient added successfully");
+                            location.reload();
+                        }
+                        else {
+                            alert("Invalid data.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error adding patient");
+                    }
+                });
+
+            });
+
+     
+    
+    
+
+        
+
+                // ================= SEARCH FUNCTION =================
+        $("#btnSearch").click(function () {
+
+            var searchValue = $("#searchInput").val();
+            // 2️⃣ Call controller using AJAX (GET request)
+                 // 2️⃣ Send AJAX request to controller
+        $.ajax({
+
+            type: "GET",   // GET because we are retrieving data
+
+            // 3️⃣ URL generated using Razor (correct way)
+            url: '@Url.Action("SearchPatients", "Receptionist")',
+
+            // 4️⃣ Data sent to controller as parameter
+            data: { searchValue: searchValue },
+
+            // 5️⃣ If request succeeds
+            success: function (data) {
+
+                // Get table body reference
+                var tableBody = $("#patientTableBody");
+
+                // Clear old rows before inserting new results
+                tableBody.empty();
+
+                // 6️⃣ If no data returned
+                if (data.length === 0) {
+                    tableBody.append(
+                        "<tr><td colspan='8' class='text-center'>No patients found</td></tr>"
+                    );
+                    return; // Stop execution
+                }
+
+                // 7️⃣ Loop through returned patient list
+                $.each(data, function (index, patient) {
+
+                    // Format Date of Birth (remove time)
+                    var dob = patient.dob
+                        ? patient.dob.split('T')[0]
+                        : "";
+
+                    // Format Created Date
+                    var createdAt = patient.createdAt
+                        ? patient.createdAt.split('T')[0]
+                        : "";
+
+                    // 8️⃣ Build HTML row dynamically
+                    var row =
+                        "<tr>" +
+                             // PROFILE COLUMN
+        "<td class='text-center'>" +
+            "<div class='avatar-circle'>" +
+                patient.patientName.charAt(0).toUpperCase() +
+            "</div>" +
+        "</td>" +
+                            "<td>MMR-" + patient.patientId.toString().padStart(4, '0') + "</td>" +
+                            "<td>" + patient.patientName + "</td>" +
+                            "<td>" + dob + "</td>" +
+                            "<td>" + patient.gender + "</td>" +
+                            "<td>" + patient.contact + "</td>" +
+                            "<td>" + (patient.email || "") + "</td>" +
+                            "<td>" + (patient.address || "") + "</td>" +
+                            "<td>" + createdAt + "</td>" +
+                            "<td>" +
+                                "<button class='btn btn-primary btn-sm btnEdit' data-id='" + patient.patientId + "'>Edit</button> " +
+                                "<button class='btn btn-success btn-sm btnBook' data-id='" + patient.patientId + "' data-name='" + patient.patientName + "'>Book</button>" +
+                            "</td>" +
+                        "</tr>";
+
+                    // 9️⃣ Append row to table
+                    tableBody.append(row);
+                });
+            },
+
+            // 🔟 If AJAX fails
+            error: function () {
+                alert("Search failed");
+            }
+
+        });
+        });
+
+
+        // ================= RESET FUNCTION =================
+        $("#btnReset").click(function () {
+
+            // Clear  search textboxes
+           $("#searchInput").val("");
+
+            // Reload full page to show all patients again
+            location.reload();
+        });
+
+
+         // ================= LOAD EDIT DATA =================/
+         //  clicksEdit-->Gets patient id--> Calls controller GET Edit(id)--> Gets JSON-> Fills modal inputs-> Opens modal
+        
+        $(document).on("click", ".btnEdit", function () {
+
+            // Get patient id from button
+            var patientId = $(this).data("id");
+
+            $.ajax({
+                type: "GET",
+                 url: '@Url.Action("Edit", "Receptionist")',
+
+                data: { id: patientId },
+
+                success: function (data) {
+
+                    // Fill modal fields with returned data
+                    $("#edit_patientId").val(data.patientId);
+                    $("#edit_patientName").val(data.patientName);
+                    $("#edit_dob").val(data.dob ? data.dob.split('T')[0] : "");
+                    $("#edit_contact").val(data.contact);
+                    $("#edit_email").val(data.email);
+                    $("#edit_address").val(data.address);
+
+                    // Set gender radio button
+                    $("input[name='EditGender'][value='" + data.gender + "']")
+                        .prop("checked", true);
+
+                    // Open modal
+                    $("#EditPatientModal").modal("show");
+                },
+
+                error: function () {
+                    alert("Failed to load patient data");
+                }
+            });
+
+        });
+
+
+                // ================= UPDATE PATIENT =================
+        $("#btnUpdatePatient").click(function (e) {
+
+            e.preventDefault();
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            var patientData = {
+                PatientId: $("#edit_patientId").val(),
+                PatientName: $("#edit_patientName").val(),
+                Dob: $("#edit_dob").val(),
+                Gender: $("input[name='EditGender']:checked").val(),
+                Contact: $("#edit_contact").val(),
+                Email: $("#edit_email").val(),
+                Address: $("#edit_address").val()
+            };
+
+            $.ajax({
+                type: "POST",
+                   url: '@Url.Action("Edit", "Receptionist")',
+                data: patientData,
+                headers: { "RequestVerificationToken": token },
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        $("#EditPatientModal").modal("hide");
+
+                        alert("Patient updated successfully");
+
+                        location.reload();
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                },
+
+                error: function () {
+                    alert("Error updating patient");
+                }
+            });
+
+        });
+
+
+                 // Load slots when doctor OR date changes
+      $("#doctorSelect, #appointmentDate").change(function () {
+
+                    var doctorId = $("#doctorSelect").val();
+        var date = $("#appointmentDate").val();
+
+        if (!doctorId || !date) {
+            return; // STOP here if date empty
+        }
+
+
+            $.ajax({
+                type: "GET",
+                  url: '@Url.Action("GetAvailableSlots", "Receptionist")',
+
+                data: { doctorId: doctorId, appointmentDate: date },
+
+                success: function (data) {
+
+                    var slotDropdown = $("#slotSelect");
+                    slotDropdown.empty();
+                    slotDropdown.append('<option value="">-- Select Slot --</option>');
+
+                    if (data.length === 0) {
+                        slotDropdown.append('<option disabled>No Slots Available</option>');
+                        return;
+                    }
+
+                    $.each(data, function (i, slot) {
+
+                        var time = slot.slotTime.substring(0,5);
+
+                        slotDropdown.append(
+                            '<option value="' + slot.slotId + '">' +
+                            time + ' (Token ' + slot.tokenNo + ')' +
+                            '</option>'
+                        );
+                    });
+                },
+
+                error: function () {
+                    alert("Failed to load slots");
+                }
+            });
+
+      });   
+
+                // Open booking modal when clicking Book button
+                 $(document).on("click", ".btnBook", function () {
+
+                var patientId = $(this).data("id");
+                var patientName = $(this).data("name");
+                
+                //fill modal fileds
+
+                $("#booking_patientId").val(patientId);
+                $("#booking_patientName").val(patientName);
+                //clear previous selections
+
+                $("#doctorSelect").val("");
+                $("#appointmentDate").val("");
+                $("#slotSelect").empty().append('<option value="">-- Select Slot --</option>');
+                // show modal
+
+                $("#BookAppointmentModal").modal("show");
+            });
+
+
+
+
+        //---------book appintment-------
+
+                $("#btnBookAppointment").click(function () {
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            var bookingData = {
+               PatientId: $("#booking_patientId").val(),
+
+                DoctorId: $("#doctorSelect").val(),
+                SlotId: $("#slotSelect").val(),
+                AppointmentDate: $("#appointmentDate").val(),
+                CreatedBy: 1 // temporarily hardcoded (replace with logged-in user later)
+            };
+
+            $.ajax({
+                type: "POST",
+                 url: '@Url.Action("BookAppointment", "Receptionist")',
+
+                data: bookingData,
+                headers: { "RequestVerificationToken": token },
+
+                success: function (response) {
+
+                           if (response.success) {
+
+            var appointmentId = response.appointmentId;
+
+            alert(response.message);
+
+            $("#BookAppointmentModal").modal("hide");
+
+            $("#BookAppointmentForm")[0].reset();
+            $("#slotSelect").empty();
+
+            // 🔥 NEW: Automatically Generate Consultation Bill
+          // ✅ ADD CONFIRMATION HERE
+        if (confirm("Do you want to generate consultation bill now?")) {
+
+            generateConsultationBill(appointmentId);
+
+        }
+
+
+        } else {
+            alert(response.message);
+        }
+                }
+            });
+
+        });
+     });
+             // generate bill
+
+                function generateConsultationBill(appointmentId) {
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/Receptionist/GenerateConsultationBill",
+                data: { appointmentId: appointmentId },
+                headers: { "RequestVerificationToken": token },
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        var bill = response.bill;
+
+                        // Fill modal fields
+                     var formattedDate = bill.appointmentDate
+                      ? bill.appointmentDate.split('T')[0]: "";
+                       $("#billDate").text(formattedDate);
+                       
+                        $("#billPatient").text(bill.patientName);
+                        $("#billDoctor").text(bill.doctorName);
+                        $("#billSpecialization").text(bill.specialization);
+                        $("#billFee").text(bill.consultationFee);
+
+                        $("#ConsultationBillModal").modal("show");
+                    }
+                },
+                error: function () {
+                    alert("Billing failed");
+                }
+            });
+        }   
+            function printBill() {
+            window.print();
+            }
+
+                    $(document).on("click", ".btnBill", function () {
+
+            var appointmentId = $(this).data("id");
+
+            generateConsultationBill(appointmentId);
+
+        });
+
+    </script>
+
+     
+
+}
+<style>
+    /* Smooth animation */
+    #patientTableBody tr {
+        transition: all 0.25s ease-in-out;
+        cursor: pointer;
+    }
+
+    /* Hover effect */
+    #patientTableBody tr:hover {
+        transform: scale(1.07);   /* makes row bigger */
+        background-color: #f8fbff; /* light highlight */
+        box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+        z-index: 2;
+        position: relative;
+    }
+
+    .table-hover tbody tr:hover td {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+</style>
+
+
+<style>
+    .btnBill {                      
+        margin-left: 2px;
+    }
+
+    .avatar-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,#0d6efd,#6f42c1);
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+        transition: .3s;
+    }
+
+    /* hover animation */
+    tr:hover .avatar-circle {
+        transform: scale(1.15);
+        box-shadow: 0 6px 18px rgba(13,110,253,.4);
+    }
+    /* ===============================
+       SEARCH BAR PROJECTION ANIMATION
+    ==================================*/
+
+    .neo-search {
+        transition: all .35s ease;
+        transform: perspective(800px) scale(1);
+    }
+
+        /* hover projection */
+        .neo-search:hover {
+            transform: perspective(800px) scale(1.03) translateY(-2px);
+            box-shadow: 0 12px 28px rgba(13,110,253,.35), 0 0 0 2px rgba(255,255,255,.2) inset;
+        }
+
+        /* focus projection (typing state) */
+        .neo-search:focus-within {
+            transform: perspective(800px) scale(1.04);
+            box-shadow: 0 16px 40px rgba(13,110,253,.45), 0 0 18px rgba(13,110,253,.35);
+        }
+</style>
+
+
+<style>
+
+    /* Reduce row height */
+    .table td,
+    .table th {
+        padding: 8px 10px; /* default bootstrap = 16px */
+        font-size: 14px;
+    }
+
+    /* Compact avatar */
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    }
+
+    /* Reduce row spacing */
+    .table tbody tr {
+        height: 52px;
+    }
+
+    /* Make buttons compact */
+    .btn-sm {
+        padding: 3px 8px;
+        font-size: 13px;
+        border-radius: 6px;
+    }
+
+    /* Action column spacing */
+    td:last-child {
+        white-space: nowrap;
+    }
+
+    /* Reduce header height */
+    .table thead th {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .custom-head th {
+        background: rgba(59,130,246,.85) !important;
+        backdrop-filter: blur(8px);
+        color: #fff !important;
+    }
+
+    .search-icon i {
+        transition: .3s;
+    }
+
+    .neo-search:hover .search-icon i {
+        transform: scale(1.2) rotate(8deg);
+    }
+
+</style>
+<style>
+
+    /* MMRID column */
+    .table td:nth-child(2),
+    .table th:nth-child(2) {
+        text-align: center;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    /* Created Date column */
+    .table td:nth-child(9),
+    .table th:nth-child(9) {
+        text-align: center;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+
+    /* Prevent text breaking anywhere */
+    .table td {
+        vertical-align: middle;
+    }
+
+</style>
+
+<style>
+
+    /* ===============================
+       PREMIUM BLUE SEARCH BAR THEME
+    ================================ */
+
+    .neo-search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        height: 48px;
+        padding: 6px;
+        border-radius: 40px;
+        /* NEW PROFESSIONAL GRADIENT */
+        background: linear-gradient(135deg,#1e3a8a,#1d4ed8);
+        box-shadow: 0 10px 25px rgba(30,64,175,.25);
+        transition: .35s;
+    }
+
+        /* hover projection */
+        .neo-search:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 14px 35px rgba(37,99,235,.35);
+        }
+
+        /* focus glow */
+        .neo-search:focus-within {
+            box-shadow: 0 0 0 2px #93c5fd, 0 14px 40px rgba(37,99,235,.45);
+        }
+
+    /* ===============================
+       ICON STYLE
+    ================================ */
+
+    .search-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: #1e40af;
+        transition: .3s;
+    }
+
+    .neo-search:hover .search-icon {
+        transform: rotate(10deg) scale(1.08);
+    }
+
+    /* ===============================
+       INPUT FIELD
+    ================================ */
+
+    .neo-search input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent !important;
+        color: white;
+        font-size: 14px;
+        padding: 0 12px;
+    }
+
+        .neo-search input::placeholder {
+            color: rgba(255,255,255,.75);
+        }
+
+    /* ===============================
+       SEARCH BUTTON
+    ================================ */
+
+    .search-btn {
+        border: none;
+        padding: 5px 14px;
+        border-radius: 20px;
+        background: #ffffff;
+        color: #1e3a8a;
+        font-weight: 600;
+        font-size: 13px;
+        transition: .25s;
+    }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            background: #eff6ff;
+        }
+
+    /* ===============================
+       RESET BUTTON
+    ================================ */
+
+    .reset-btn {
+        border: none;
+        padding: 5px 13px;
+        border-radius: 20px;
+        background: #c7d2fe;
+        color: #1e40af;
+        font-size: 13px;
+        font-weight: 500;
+        transition: .25s;
+    }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            background: #a5b4fc;
+        }
+
+</style>
+
+<style>
+    .search-row {
+        margin-bottom: 20px !important; /* spacing below search */
+    }
+
+    .table {
+        margin-top: 10px !important; /* small top breathing space */
+    }
+</style>
+<style>
+
+    /* ===============================
+       SUPER VISIBLE GRADIENT
+    ================================ */
+
+    body {
+        background: linear-gradient(120deg,#c7d2fe,#dbeafe,#bfdbfe,#c7d2fe);
+        background-size: 400% 400%;
+        animation: gradientFlow 14s ease infinite;
+        overflow-x: hidden;
+    }
+
+    @@keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+
+    /* ===============================
+       STRONG GLOW ORBS
+    ================================ */
+
+    body::before,
+    body::after {
+        content: "";
+        position: fixed;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        filter: blur(120px);
+        z-index: -1;
+    }
+
+    /* blue glow */
+    body::before {
+        background: radial-gradient(circle,#2563eb,#1d4ed800 70%);
+        top: -180px;
+        left: -160px;
+        animation: float1 18s linear infinite;
+    }
+
+    /* purple glow */
+    body::after {
+        background: radial-gradient(circle,#7c3aed,#6d28d900 70%);
+        bottom: -200px;
+        right: -180px;
+        animation: float2 22s linear infinite;
+    }
+
+    @@keyframes float1 {
+        0% {
+            transform: translate(0,0)
+        }
+
+        50% {
+            transform: translate(220px,130px)
+        }
+
+        100% {
+            transform: translate(0,0)
+        }
+    }
+
+    @@keyframes float2 {
+        0% {
+            transform: translate(0,0)
+        }
+
+        50% {
+            transform: translate(-220px,-150px)
+        }
+
+        100% {
+            transform: translate(0,0)
+        }
+    }
+
+
+    /* ===============================
+       STRONG GRID VISIBILITY
+    ================================ */
+
+    html::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(rgba(0,0,0,.09) 1px,transparent 1px), linear-gradient(90deg,rgba(0,0,0,.09) 1px,transparent 1px);
+        background-size: 45px 45px;
+        z-index: -2;
+    }
+    .neon-btn{
+    border:2px solid #3b82f6;
+    color:#3b82f6;
+    background:transparent;
+    font-weight:600;
+    padding:8px 20px;
+    border-radius:25px;
+    transition:.3s;
+}
+
+.neon-btn:hover{
+    background:#3b82f6;
+    color:white;
+    box-shadow:0 0 15px #3b82f6, 0 0 30px #3b82f6;
+}
+</style>

@@ -8,11 +8,11 @@ namespace HospitalManagement
     {
         public static void Main(string[] args)
         {
-            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
             var builder = WebApplication.CreateBuilder(args);
             QuestPDF.Settings.License = LicenseType.Community;
 
-
+            builder.Services.AddSession();
+          
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IReceptionistRepository, ReceptionistRepository>();
@@ -36,9 +36,11 @@ namespace HospitalManagement
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-           
+            
+
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseSession();
 
             app.UseAuthorization();
 

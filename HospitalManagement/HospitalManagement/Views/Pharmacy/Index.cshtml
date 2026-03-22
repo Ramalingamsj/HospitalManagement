@@ -102,7 +102,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
 
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" id="medicineForm">
 
                 <div class="modal-header bg-primary text-white">
                     <h5>Add Medicine</h5>
@@ -111,20 +111,48 @@
 
                 <div class="modal-body">
 
-                    <label>Name</label>
-                    <input name="MedicineName" class="form-control mb-2" required />
+                    <!-- Name -->
+                    <label>Name *</label>
+                    <input name="MedicineName"
+                           id="medName"
+                           class="form-control mb-1" />
+                    <small class="text-danger error" id="nameErr"></small>
 
-                    <label>Type</label>
-                    <input name="MedicineType" class="form-control mb-2" required />
+                    <!-- Type -->
+                    <label>Type *</label>
+                    <select name="MedicineType"
+                            id="medType"
+                            class="form-select mb-1">
+                        <option value="">-- Select Type --</option>
+                        <option>Tablet</option>
+                        <option>Syrup</option>
+                    </select>
+                    <small class="text-danger error" id="typeErr"></small>
 
+                    <!-- Description -->
                     <label>Description</label>
-                    <input name="Description" class="form-control mb-2" />
+                    <input name="Description"
+                           id="medDesc"
+                           class="form-control mb-2" />
 
-                    <label>Stock</label>
-                    <input name="StockQuantity" type="number" class="form-control mb-2" required />
+                    <!-- Stock -->
+                    <label>Stock *</label>
+                    <input name="StockQuantity"
+                           id="medStock"
+                           type="number"
+                           min="0"
+                           class="form-control mb-1" />
+                    <small class="text-danger error" id="stockErr"></small>
 
-                    <label>Price</label>
-                    <input name="Price" type="number" step="0.01" class="form-control mb-2" required />
+                    <!-- Price -->
+                    <label>Price *</label>
+                    <input name="Price"
+                           id="medPrice"
+                           type="number"
+                           step="0.01"
+                           min="0"
+                           class="form-control mb-1" />
+                    <small class="text-danger error" id="priceErr"></small>
 
                 </div>
 
@@ -138,6 +166,43 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById("medicineForm")
+    .addEventListener("submit", function(e){
+
+        let valid = true;
+
+        document.querySelectorAll(".error").forEach(el=>el.innerText="");
+
+        let name = medName.value.trim();
+        let type = medType.value;
+        let stock = medStock.value;
+        let price = medPrice.value;
+
+        if(!name){
+            nameErr.innerText="Medicine name is required";
+            valid=false;
+        }
+
+        if(!type){
+            typeErr.innerText="Select medicine type";
+            valid=false;
+        }
+
+        if(stock==="" || stock<0){
+            stockErr.innerText="Enter valid stock";
+            valid=false;
+        }
+
+        if(price==="" || price<=0){
+            priceErr.innerText="Enter valid price";
+            valid=false;
+        }
+
+        if(!valid) e.preventDefault();
+    });
+</script>
 
 <!-- ================= UPDATE STOCK MODAL ================= -->
 
@@ -208,3 +273,120 @@
     }
 
 </script>
+<style>
+
+    /* ===============================
+           SUPER VISIBLE GRADIENT
+        ================================ */
+
+    body {
+        background: linear-gradient(120deg,#c7d2fe,#dbeafe,#bfdbfe,#c7d2fe);
+        background-size: 400% 400%;
+        animation: gradientFlow 14s ease infinite;
+        overflow-x: hidden;
+    }
+
+    @@keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+
+    /* ===============================
+           STRONG GLOW ORBS
+        ================================ */
+
+    body::before,
+    body::after {
+        content: "";
+        position: fixed;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        filter: blur(120px);
+        z-index: -1;
+    }
+
+    /* blue glow */
+    body::before {
+        background: radial-gradient(circle,#2563eb,#1d4ed800 70%);
+        top: -180px;
+        left: -160px;
+        animation: float1 18s linear infinite;
+    }
+
+    /* purple glow */
+    body::after {
+        background: radial-gradient(circle,#7c3aed,#6d28d900 70%);
+        bottom: -200px;
+        right: -180px;
+        animation: float2 22s linear infinite;
+    }
+
+    @@keyframes float1 {
+        0% {
+            transform: translate(0,0)
+        }
+
+        50% {
+            transform: translate(220px,130px)
+        }
+
+        100% {
+            transform: translate(0,0)
+        }
+    }
+
+    @@keyframes float2 {
+        0% {
+            transform: translate(0,0)
+        }
+
+        50% {
+            transform: translate(-220px,-150px)
+        }
+
+        100% {
+            transform: translate(0,0)
+        }
+    }
+
+
+    /* ===============================
+           STRONG GRID VISIBILITY
+        ================================ */
+
+    html::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(rgba(0,0,0,.09) 1px,transparent 1px), linear-gradient(90deg,rgba(0,0,0,.09) 1px,transparent 1px);
+        background-size: 45px 45px;
+        z-index: -2;
+    }
+
+    .neon-btn {
+        border: 2px solid #3b82f6;
+        color: #3b82f6;
+        background: transparent;
+        font-weight: 600;
+        padding: 8px 20px;
+        border-radius: 25px;
+        transition: .3s;
+    }
+
+        .neon-btn:hover {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 0 15px #3b82f6, 0 0 30px #3b82f6;
+        }
+</style>

@@ -46,6 +46,7 @@ namespace HospitalManagement.Repository
                     {
                         AppointmentId = Convert.ToInt32(reader["appointment_id"]),
                         PatientName = reader["patient_name"].ToString(),
+                        PatientId = Convert.ToInt32(reader["Patient_id"]),
                         Gender = reader["gender"].ToString(),
                         Contact = reader["contact"].ToString(),
                         SlotTime = (TimeSpan)reader["slot_time"],

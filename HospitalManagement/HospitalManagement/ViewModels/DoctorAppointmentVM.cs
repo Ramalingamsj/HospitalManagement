@@ -3,6 +3,7 @@
     public class DoctorAppointmentVM
     {
         public int AppointmentId { get; set; }
+        public int PatientId { get; set; }
         public string PatientName { get; set; }
         public string Gender { get; set; }
         public string Contact { get; set; }
